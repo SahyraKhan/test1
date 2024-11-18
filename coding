@@ -1,0 +1,218 @@
+# Import datetime module to use for order time
+from datetime import datetime
+
+# Initialize the menu items and their availability using a list of lists
+menu_items = [
+    ["Burger", 5.99],
+    ["Pizza", 8.99],
+    ["Pasta", 7.99],
+    ["Salad", 4.99],
+    ["Fries", 2.99],
+    ["Coke", 1.99]
+]
+
+# Initialize an empty cart, sales record, and feedback list
+cart = []
+sales_record = []
+feedback_list = []
+
+
+# Function to display the customer menu
+def display_menu():
+    print("\n--- Welcome to QuickBite! ---")
+    print("1. View Menu")
+    print("2. Add Item to Cart")
+    print("3. View Cart")
+    print("4. Checkout")
+    print("5. Admin Interface")
+    print("6. Provide Feedback")
+    print("7. Exit")
+    print("--------------------------------")
+
+
+# Function to view available menu items
+def view_menu():
+    print("\nMenu:")
+    for item in menu_items:  # Loop through the list of menu items
+        print(f"- {item[0]}: £{item[1]:.2f}")
+
+
+# Function to add item to cart
+def add_to_cart():
+    item_name = input("Enter the name of the item you want to add: ").strip()
+    found = False
+    for item in menu_items:  # Loop through the list of menu items
+        if item_name == item[0]:  # Check if the item exists
+            found = True
+            quantity = int(input(f"How many {item_name}s would you like to add? "))
+            cart.append([item[0], item[1], quantity])  # Add item to cart
+            print(f"Added {quantity} {item_name}(s) to your cart.")
+            break
+    if not found:
+        print("Item not found.")
+
+
+# Function to view items in the cart
+def view_cart():
+    if not cart:
+        print("\nYour cart is empty.")
+        return
+
+    print("\nYour Cart:")
+    total = 0
+    for item in cart:  # Loop through the list of items in the cart
+        print(f"- {item[0]} (x{item[2]}): £{item[1] * item[2]:.2f}")
+        total += item[1] * item[2]
+    print(f"\nTotal: £{total:.2f}")
+
+
+# Function to check out and calculate total
+def checkout():
+    if not cart:
+        print("\nYour cart is empty.")
+        return
+
+    subtotal = 0
+    print("\nOrder Summary:")
+    for item in cart:
+        print(f"- {item[0]} (x{item[2]}): £{item[1] * item[2]:.2f}")
+        subtotal += item[1] * item[2]
+
+    # Applying a discount if applicable (for simplicity, a flat 10% discount)
+    discount = 0
+    apply_discount = input("Do you have a discount? (yes/no): ").strip().lower()
+    if apply_discount == "yes":
+        discount = subtotal * 0.10
+        print(f"Discount applied: £{discount:.2f}")
+
+    # Calculate tax (let's assume 7% tax)
+    tax = (subtotal - discount) * 0.07
+    total = subtotal - discount + tax
+
+    print(f"Subtotal: £{subtotal:.2f}")
+    print(f"Discount: -£{discount:.2f}")
+    print(f"Tax: +£{tax:.2f}")
+    print(f"Total Amount: £{total:.2f}")
+
+    # Confirm order
+    confirm = input("Do you want to confirm your order? (yes/no): ").strip().lower()
+    if confirm == "yes":
+        # Get the current date and time
+        order_time = datetime.now()
+        print(f"Order confirmed! Thank you for ordering from QuickBite on {order_time.strftime('%Y-%m-%d %H:%M:%S')}.")
+        # Record the sale with the order timestamp
+        sales_record.append({"items": cart[:], "total": total, "order_time": order_time})
+        # Clear the cart after checkout
+        cart.clear()
+    else:
+        print("Order canceled.")
+
+    # Offer print or email option
+    receipt_choice = input("Would you like to print or email the receipt? (print/email): ").strip().lower()
+    if receipt_choice == "print":
+        print("Printing receipt...")
+        # In a real-world scenario, this would send the receipt to a printer
+    elif receipt_choice == "email":
+        email = input("Enter your email address: ").strip()
+        print(f"Emailing receipt to {email}...")
+        # In a real-world scenario, this would send the receipt to the provided email address
+    else:
+        print("No receipt option selected.")
+
+
+# Function to provide customer feedback
+def provide_feedback():
+    feedback = input("Please provide your feedback: ").strip()
+    feedback_list.append(feedback)
+    print("Thank you for your feedback!")
+
+
+# Admin interface for system management
+def admin_interface():
+    password = input("Enter admin password: ")
+    if password != "admin123":
+        print("Invalid password.")
+        return
+
+    while True:
+        print("\n--- Admin System Management ---")
+        print("1. Generate Sales Report")
+        print("2. Analyze Popular Items & Trends")
+        print("3. Backup Order History")
+        print("4. View Customer Feedback")
+        print("5. Back to Main Menu")
+        choice = input("Enter your choice (1-5): ")
+
+        if choice == '1':
+            # Generate sales report
+            if not sales_record:
+                print("No sales recorded yet.")
+            else:
+                total_sales = sum(sale['total'] for sale in sales_record)
+                print(f"\nTotal Sales: £{total_sales:.2f}")
+
+        elif choice == '2':
+            # Analyze popular items and trends
+            if not sales_record:
+                print("No sales recorded yet.")
+            else:
+                item_sales = {}
+                for sale in sales_record:
+                    for item in sale['items']:
+                        if item[0] in item_sales:
+                            item_sales[item[0]] += item[2]  # Add quantity
+                        else:
+                            item_sales[item[0]] = item[2]
+
+                print("\nPopular Items & Trends:")
+                sorted_items = sorted(item_sales.items(), key=lambda x: x[1], reverse=True)
+                for item, qty in sorted_items:
+                    print(f"- {item}: {qty} sold")
+
+        elif choice == '3':
+            # Backup order history
+            print("\nBacking up order history...")
+            # In a real-world scenario, this would involve saving to a file or database.
+            print("Order history backed up successfully!")
+
+        elif choice == '4':
+            # View customer feedback
+            if not feedback_list:
+                print("No feedback received yet.")
+            else:
+                print("\nCustomer Feedback:")
+                for feedback in feedback_list:
+                    print(f"- {feedback}")
+
+        elif choice == '5':
+            break
+
+        else:
+            print("Invalid choice. Please try again.")
+
+
+# Main loop to run the QuickBite system
+while True:
+    display_menu()
+
+    # Get user choice
+    choice = input("Enter your choice (1-7): ")
+
+    # Handle each choice using the defined functions
+    if choice == '1':
+        view_menu()
+    elif choice == '2':
+        add_to_cart()
+    elif choice == '3':
+        view_cart()
+    elif choice == '4':
+        checkout()
+    elif choice == '5':
+        admin_interface()
+    elif choice == '6':
+        provide_feedback()
+    elif choice == '7':
+        print("Exiting the system. Have a great day!")
+        break
+    else:
+        print("Invalid choice. Please select a valid option.")
